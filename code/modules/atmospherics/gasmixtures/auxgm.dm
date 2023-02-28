@@ -44,14 +44,13 @@ GLOBAL_LIST_INIT(nonreactive_gases, typecacheof(list(GAS_O2, GAS_N2, GAS_CO2, GA
 	var/specific_heat = 0
 	var/name = ""
 	var/gas_overlay = "" //icon_state in icons/effects/atmospherics.dmi
-	var/color = "#ffff"
 	var/moles_visible = null
 	var/flags = NONE //currently used by canisters
 	var/group = null // groups for scrubber/filter listing
 	var/fusion_power = 0 // How much the gas destabilizes a fusion reaction
 	var/breath_results = GAS_CO2 // what breathing this breathes out
-	var/datum/reagent/breath_reagent = null // what breathing this adds to your reagents
-	var/datum/reagent/breath_reagent_dangerous = null // what breathing this adds to your reagents IF it's above a danger threshold
+	var/breath_reagent = null // what breathing this adds to your reagents
+	var/breath_reagent_dangerous = null // what breathing this adds to your reagents IF it's above a danger threshold
 	var/list/breath_alert_info = null // list for alerts that pop up when you have too much/not enough of something
 	var/oxidation_temperature = null // temperature above which this gas is an oxidizer; null for none
 	var/oxidation_rate = 1 // how many moles of this can oxidize how many moles of material
@@ -128,7 +127,6 @@ GLOBAL_LIST_INIT(nonreactive_gases, typecacheof(list(GAS_O2, GAS_N2, GAS_CO2, GA
 		breathing_classes[breathing_class_path] = class
 	done_initializing = TRUE
 	finalize_gas_refs()
-
 
 GLOBAL_DATUM_INIT(gas_data, /datum/auxgm, new)
 

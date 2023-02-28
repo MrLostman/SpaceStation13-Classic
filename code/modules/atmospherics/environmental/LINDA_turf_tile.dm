@@ -27,6 +27,9 @@
 
 	var/list/atmos_overlay_types //gas IDs of current active gas overlays
 
+/turf/proc/should_conduct_to_space()
+	return baseturf == /turf/open/space
+
 /turf/open/Initialize(mapload)
 	if(!blocks_air)
 		air = new(2500,src)
@@ -205,6 +208,10 @@
 /turf/open/process_cell(fire_count)
 
 //////////////////////////SPACEWIND/////////////////////////////
+
+//compatibility, not actually multiz
+/proc/get_dir_multiz(cur_turf, adj_turf)
+	return get_dir(cur_turf, adj_turf)
 
 /turf/proc/consider_pressure_difference()
 	return

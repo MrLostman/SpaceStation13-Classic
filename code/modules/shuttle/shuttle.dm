@@ -534,14 +534,6 @@
 	var/list/old_turfs = return_ordered_assoc_turfs(x, y, z, dir)
 	var/list/new_turfs = return_ordered_turfs(new_dock.x, new_dock.y, new_dock.z, new_dock.dir)
 	/**************************************************************************************************************/
-	
-	for(var/turf/old_terf in old_turfs)
-		old_terf.set_sleeping(TRUE)
-	for(var/turf/new_terf in new_turfs)
-		new_terf.set_sleeping(TRUE)
-
-	if(SSair.initialized)
-		sleep(1)
 
 	var/area/underlying_old_area = locate("[underlying_area_type]")
 	if(!underlying_old_area)
@@ -905,5 +897,3 @@
 
 /obj/docking_port/mobile/emergency/on_emergency_dock()
 	return
-
-#undef DOCKING_PORT_HIGHLIGHT

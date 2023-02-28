@@ -54,8 +54,6 @@ SUBSYSTEM_DEF(air)
 	var/list/turf/open/high_pressure_delta = list()
 	var/list/pipe_construction_generation_cache = list()
 
-
-
 	var/list/currentrun = list()
 	var/currentpart = SSAIR_REBUILD_PIPENETS
 
@@ -121,7 +119,6 @@ SUBSYSTEM_DEF(air)
 
 /datum/controller/subsystem/air/proc/add_reaction(datum/gas_reaction/r)
 	gas_reactions += r
-	sortTim(gas_reactions, /proc/cmp_gas_reaction)
 	auxtools_update_reactions()
 
 /proc/reset_all_air()
@@ -146,8 +143,12 @@ SUBSYSTEM_DEF(air)
 
 /datum/controller/subsystem/air/fire(resumed = 0)
 	if(thread_running())
+		cur_thread_wait_ticks++
 		pause()
 		return
+
+	thread_wait_ticks = MC_AVERAGE(thread_wait_ticks, cur_thread_wait_ticks)
+	cur_thread_wait_ticks = 0
 
 	var/timer = TICK_USAGE_REAL
 
@@ -198,11 +199,22 @@ SUBSYSTEM_DEF(air)
 	if(currentpart == SSAIR_FINALIZE_TURFS)
 		finish_turf_processing(resumed)
 		if(state != SS_RUNNING)
-			cur_thread_wait_ticks++
 			return
 		resumed = 0
-		thread_wait_ticks = MC_AVERAGE(thread_wait_ticks, cur_thread_wait_ticks)
-		cur_thread_wait_ticks = 0
+		currentpart = SSAIR_EXCITEDGROUPS
+
+	if(currentpart == SSAIR_EXCITEDGROUPS)
+		process_excited_groups(resumed)
+		if(state != SS_RUNNING)
+			return
+		resumed = 0
+		currentpart = SSAIR_EQUALIZE
+
+	if(currentpart == SSAIR_EQUALIZE)
+		equalize_turfs(resumed)
+		if(state != SS_RUNNING)
+			return
+		resumed = 0
 		currentpart = SSAIR_DEFERRED_AIRS
 
 	if(currentpart == SSAIR_DEFERRED_AIRS)
@@ -243,7 +255,7 @@ SUBSYSTEM_DEF(air)
 			return
 		resumed = 0
 	currentpart = SSAIR_REBUILD_PIPENETS
-	
+
 /datum/controller/subsystem/air/proc/process_pipenets(resumed = FALSE)
 	if (!resumed)
 		src.currentrun = networks.Copy()
@@ -331,16 +343,16 @@ SUBSYSTEM_DEF(air)
 		if(MC_TICK_CHECK)
 			return
 
-/datum/controller/subsystem/air/proc/process_turf_equalize(resumed = 0)
-	if(process_turf_equalize_auxtools(resumed,MC_TICK_REMAINING_MS))
-		pause()
-
 /datum/controller/subsystem/air/proc/process_turfs(resumed = 0)
 	if(process_turfs_auxtools(resumed,MC_TICK_REMAINING_MS))
 		pause()
 
 /datum/controller/subsystem/air/proc/process_excited_groups(resumed = 0)
 	if(process_excited_groups_auxtools(resumed,MC_TICK_REMAINING_MS))
+		pause()
+
+/datum/controller/subsystem/air/proc/equalize_turfs(resumed = 0)
+	if(equalize_turfs_auxtools(MC_TICK_REMAINING_MS))
 		pause()
 
 /datum/controller/subsystem/air/proc/finish_turf_processing(resumed = 0)
@@ -352,6 +364,7 @@ SUBSYSTEM_DEF(air)
 		pause()
 
 /datum/controller/subsystem/air/proc/finish_turf_processing_auxtools()
+/datum/controller/subsystem/air/proc/equalize_turfs_auxtools()
 /datum/controller/subsystem/air/proc/process_turfs_auxtools()
 /datum/controller/subsystem/air/proc/post_process_turfs_auxtools()
 /datum/controller/subsystem/air/proc/process_turf_equalize_auxtools()
